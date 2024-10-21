@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言管理</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900" rel="stylesheet">
+
+    <!-- FontAwesome JS -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+
+    <!-- 引用外部的 CSS 檔案 -->
+    <link rel="stylesheet" href="assets/css/commentManagement.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>留言管理</h1>
+
+    <!-- 搜尋欄 -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="搜尋姓名或ID">
+        <button onclick="searchComment()"><i class="fas fa-search"></i> 搜尋</button>
+    </div>
+
+    <!-- 留言表格 -->
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>姓名</th>
+            <th>Email</th>
+            <th>留言內容</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="commentsTableBody">
+        <!-- 動態載入的留言將插入這裡 -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // 從 Cookie 中獲取 CSRF Token 的函數
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    let csrfToken = '';
+
+    // 在頁面載入時獲取 CSRF Token 並存儲
+    document.addEventListener('DOMContentLoaded', function() {
+        // 向 /csrf 發送請求以獲取 CSRF Token
+        fetch('/csrf', { credentials: 'include' })
+            .then(response => response.json())
+            .then(data => {
+                csrfToken = data.token;
+                console.log('CSRF Token:', csrfToken);
+                // 初始載入評論
+                loadComments();
+            })
+            .catch(error => console.error('Error fetching CSRF token:', error));
+    });
+
+    // 載入所有留言
+    function loadComments() {
+        fetch('/api/comments', { credentials: 'include' })
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('commentsTableBody');
+                tableBody.innerHTML = '';  // 清空之前的資料
+                data.forEach(comment => {
+                    const row = document.createElement('tr');
+                    row.setAttribute('data-id', comment.id);
+
+                    row.innerHTML = `
+                        <td data-label="ID">${comment.id}</td>
+                        <td data-label="姓名">${comment.name}</td>
+                        <td data-label="Email">${comment.email}</td>
+                        <td data-label="留言內容" class="comment-content">${comment.comment}</td>
+                        <td data-label="操作" class="action-buttons">
+                            <button class="edit" onclick="editComment(${comment.id})"><i class="fas fa-edit"></i> 編輯</button>
+                            <button class="delete" onclick="deleteComment(${comment.id})"><i class="fas fa-trash-alt"></i> 刪除</button>
+                        </td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error loading comments:', error));
+    }
+
+    // 編輯留言
+    function editComment(id) {
+        const row = document.querySelector(`tr[data-id="${id}"]`);
+        const commentCell = row.querySelector('.comment-content');
+        const originalComment = commentCell.textContent;
+
+        // 變更為輸入框
+        commentCell.innerHTML = `<input type="text" class="edit-input" value="${originalComment}" />`;
+
+        // 將編輯按鈕變為保存
+        const editButton = row.querySelector('.edit');
+        editButton.textContent = '保存';
+        editButton.classList.remove('edit');
+        editButton.classList.add('save');
+        editButton.onclick = function() {
+            saveComment(id);
+        };
+
+        // 添加取消按鈕
+        let cancelButton = row.querySelector('.cancel');
+        if (!cancelButton) {
+            cancelButton = document.createElement('button');
+            cancelButton.innerHTML = '<i class="fas fa-times"></i> 取消';
+            cancelButton.classList.add('cancel');
+            cancelButton.onclick = function () {
+                cancelEdit(id, originalComment);
+            };
+            row.querySelector('.action-buttons').appendChild(cancelButton);
+        }
+    }
+
+    // 保存編輯後的留言
+    function saveComment(id) {
+        const row = document.querySelector(`tr[data-id="${id}"]`);
+        const commentCell = row.querySelector('.comment-content');
+        const newComment = row.querySelector('.edit-input').value;
+
+        // 獲取姓名和 Email
+        const name = row.querySelector('td:nth-child(2)').textContent;
+        const email = row.querySelector('td:nth-child(3)').textContent;
+
+        // 發送更新請求
+        fetch(`/api/comments/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': csrfToken
+            },
+            credentials: 'include',
+            body: JSON.stringify({ name, email, comment: newComment })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(() => {
+                // 更新界面
+                commentCell.textContent = newComment;
+
+                // 將保存按鈕變回編輯
+                const saveButton = row.querySelector('.save');
+                saveButton.textContent = '編輯';
+                saveButton.classList.remove('save');
+                saveButton.classList.add('edit');
+                saveButton.onclick = function() {
+                    editComment(id);
+                };
+
+                // 移除取消按鈕
+                const cancelButton = row.querySelector('.cancel');
+                if (cancelButton) {
+                    cancelButton.remove();
+                }
+            })
+            .catch(error => console.error('Error updating comment:', error));
+    }
+
+    // 取消編輯
+    function cancelEdit(id, originalComment) {
+        const row = document.querySelector(`tr[data-id="${id}"]`);
+        const commentCell = row.querySelector('.comment-content');
+        commentCell.textContent = originalComment;
+
+        // 將保存按鈕變回編輯
+        const saveButton = row.querySelector('.save');
+        saveButton.textContent = '編輯';
+        saveButton.classList.remove('save');
+        saveButton.classList.add('edit');
+        saveButton.onclick = function() {
+            editComment(id);
+        };
+
+        // 移除取消按鈕
+        const cancelButton = row.querySelector('.cancel');
+        if (cancelButton) {
+            cancelButton.remove();
+        }
+    }
+
+    // 刪除留言
+    function deleteComment(id) {
+        if (confirm(`確定要刪除 ID 為 ${id} 的留言嗎？`)) {
+            fetch(`/api/comments/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-XSRF-TOKEN': csrfToken
+                },
+                credentials: 'include'
+            })
+                .then(() => {
+                    loadComments();  // 刷新列表
+                })
+                .catch(error => console.error('Error deleting comment:', error));
+        }
+    }
+
+    // 搜尋留言的函數（需要自行實現）
+    function searchComment() {
+        // 實現搜尋功能，例如過濾列表
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,86 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 20px;
+}
+
+/* 綠色標題樣式 */
+h1, h2 {
+    color: #2A9D8F; /* 使用類似您的index頁面中的綠色 */
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: 24px; /* 可以根據您的 index 頁面調整字體大小 */
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 表單區域 */
+form {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 45%;
+    border-left: 5px solid #2A9D8F; /* 左側綠色邊框 */
+    font-family: 'Roboto', sans-serif; /* 確保表單也使用 Roboto 字體 */
+}
+
+form label {
+    font-weight: 500; /* 調整字體粗細，使其看起來更精細 */
+    color: #2A9D8F; /* 綠色標籤 */
+}
+
+form input, form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-family: 'Roboto', sans-serif; /* 保持字體一致 */
+    font-weight: 400; /* 表單輸入框中的字體設為正常權重 */
+}
+
+form button {
+    background-color: #2A9D8F; /* 按鈕的綠色 */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500; /* 按鈕的字體粗細 */
+}
+
+form button:hover {
+    background-color: #21867A; /* 當滑鼠移過按鈕時變深 */
+}
+
+/* 留言區域 */
+.comments-section {
+    width: 50%;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 5px solid #2A9D8F; /* 綠色邊框 */
+    font-family: 'Roboto', sans-serif; /* 確保留言區使用 Roboto 字體 */
+}
+
+.comment {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    font-weight: 400; /* 調整留言文字的字體權重 */
+}
+
+.comment strong {
+    color: #2A9D8F; /* 留言名稱使用綠色 */
+    font-weight: 500; /* 調整留言名稱的字體粗細 */
+}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .login-container {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #2A9D8F;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .error-message {
+      color: red;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-container">
+  <h1>Login</h1>
+
+  <!-- 登入失敗後顯示錯誤訊息 -->
+  <div class="error-message">
+    <!-- 檢查 URL 中是否包含 ?error=true -->
+    <script>
+      if (window.location.search.includes("error=true")) {
+        document.write("Invalid username or password. Please try again.");
+      }
+    </script>
+  </div>
+
+  <form method="post" action="/login">
+    <!-- 隱藏 CSRF Token -->
+    <input type="hidden" id="csrfToken" name="_csrf" value="">
+    <div>
+      <input type="text" name="username" placeholder="Username" required>
+    </div>
+    <div>
+      <input type="password" name="password" placeholder="Password" required>
+    </div>
+    <div>
+      <button type="submit">Login</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  // 在頁面載入時獲取 CSRF Token 並設置到隱藏的輸入欄位
+  document.addEventListener('DOMContentLoaded', function() {
+    fetch('/csrf', { credentials: 'include' })
+            .then(response => response.json())
+            .then(data => {
+              document.getElementById('csrfToken').value = data.token;
+            })
+            .catch(error => console.error('Error fetching CSRF token:', error));
+  });
+
+</script>
+
+</body>
+</html>

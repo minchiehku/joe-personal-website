@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- 省略頭部內容 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comment Board</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900" rel="stylesheet">
+
+    <!-- FontAwesome JS -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+
+    <!-- External CSS File -->
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<!-- 回到 index.html 的按鈕 -->
+<div style="text-align: center; margin-bottom: 20px;">
+    <a href="index.html">
+        <button style="background-color: #2A9D8F; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </button>
+    </a>
+</div>
+
+<h1>Comment Board</h1>
+
+<div class="container">
+    <form id="commentForm">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br>
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br>
+        <label for="comment">Comment:</label><br>
+        <textarea id="comment" name="comment" required></textarea><br><br>
+        <button type="submit"><i class="fas fa-paper-plane"></i> Submit Comment</button>
+    </form>
+
+    <div class="comments-section">
+        <h2>All Comments</h2>
+        <div id="comments"></div>
+    </div>
+</div>
+
+<!-- 隱藏 CSRF Token 輸入欄位（如果有的話） -->
+<input type="hidden" id="csrfToken" name="_csrf" value="">
+
+<script>
+    // 從 Cookie 中獲取 CSRF Token 的函數
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    let csrfToken = '';
+
+    // 在頁面載入時獲取 CSRF Token 並設置到全域變量
+    document.addEventListener('DOMContentLoaded', function() {
+        // 向 /csrf 發送請求以獲取 CSRF Token
+        fetch('/csrf', { credentials: 'include' })
+            .then(response => response.json())
+            .then(data => {
+                csrfToken = data.token;
+                console.log('CSRF Token:', csrfToken);
+                // 初始載入留言
+                loadComments();
+            })
+            .catch(error => console.error('Error fetching CSRF token:', error));
+    });
+
+    // 監聽表單提交事件
+    document.getElementById('commentForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const comment = document.getElementById('comment').value;
+
+        fetch('/api/comments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': csrfToken // 使用從 /csrf 獲取的 CSRF Token
+            },
+            credentials: 'include',
+            body: JSON.stringify({ name, email, comment })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                loadComments();
+                document.getElementById('commentForm').reset(); // 重置表單
+            })
+            .catch(error => console.error('Error submitting comment:', error));
+    });
+
+    // 載入所有留言
+    function loadComments() {
+        fetch('/api/comments', { credentials: 'include' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const commentsDiv = document.getElementById('comments');
+                commentsDiv.innerHTML = ''; // 清空舊的留言
+
+                // 顯示每條留言
+                data.forEach(comment => {
+                    commentsDiv.innerHTML += `
+                        <div class="comment">
+                            <strong>${comment.name}</strong> (${comment.email}): ${comment.comment} <br>
+                            <small>Posted at: ${new Date(comment.timestamp).toLocaleString()}</small>
+                        </div>
+                    `;
+                });
+            })
+            .catch(error => console.error('Error loading comments:', error)); // 捕捉錯誤
+    }
+</script>
+
+</body>
+</html>
