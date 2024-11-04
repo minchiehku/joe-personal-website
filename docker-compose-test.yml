@@ -1,0 +1,31 @@
+services:
+  db:
+    image: mysql:8.0.22
+    environment:
+      MYSQL_ROOT_PASSWORD: springboot
+      MYSQL_DATABASE: personal_website
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=springboot mysqladmin ping -h localhost -u root --silent"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  test:
+    build:
+      context: .
+      target: builder
+    command: ["./wait-for-db.sh", "db", "mvn", "test"]
+    working_dir: /app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/personal_website?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: springboot
+      SPRING_PROFILES_ACTIVE: test
+    networks:
+      - test-network
+
+networks:
+  test-network:
