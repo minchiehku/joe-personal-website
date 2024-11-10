@@ -8,7 +8,7 @@
 - Code is version-controlled on GitHub and deployed on AWS EC2, using Docker Compose to run the website on the cloud.
 - Managed the database using MySQL Workbench for easier data visualization and management.
 
-![Website Architecture](./ai/project_structure.jpg)
+![Website Architecture](./project_structure.jpg)
 
 ### Developing with Docker
 
