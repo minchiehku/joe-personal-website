@@ -1,0 +1,190 @@
+:root {
+    --bs-primary: #54B689;
+    --bs-secondary: #4f4f4f;
+    --bs-body-font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --bs-body-font-size: 1rem;
+    --bs-body-color: #292929;
+    --bs-link-color: #54B689;
+    --bs-link-hover-color: #43926e;
+    --bs-border-color: #a9a9a9;
+}
+
+body {
+    font-family: var(--bs-body-font-family);
+    font-size: var(--bs-body-font-size);
+    color: var(--bs-body-color);
+    background-color: #fff;
+    margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 500;
+    color: var(--bs-body-color);
+}
+
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-outline-primary {
+    color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+a {
+    color: var(--bs-link-color);
+    text-decoration: none;
+}
+a:hover {
+    color: var(--bs-link-hover-color);
+}
+
+hr {
+    border-top: 1px solid var(--bs-border-color);
+    opacity: 0.25;
+}
+
+.list-group-item.active {
+    color: #fff;
+    background-color: var(--bs-secondary);
+    border-color: var(--bs-secondary);
+}
+
+.list-unstyled,
+.list-inline {
+    padding-left: 0;
+    list-style: none;
+}
+
+/* Typography */
+.text-center {
+    text-align: center;
+}
+
+.font-monospace {
+    font-family: var(--bs-font-monospace);
+}
+
+.fs-5 {
+    font-size: 1.25rem;
+}
+
+.lead {
+    font-size: 1.25rem;
+    font-weight: 300;
+}
+
+.display-1 {
+    font-size: 5rem;
+    font-weight: 300;
+}
+
+/* Section styles */
+.resume-wrapper {
+    border: 1px solid rgba(0, 0, 0, 0.025);
+}
+
+.resume-section-heading {
+    position: relative;
+    padding-left: 1rem;
+    font-size: 1.125rem;
+    letter-spacing: 0.15rem;
+    color: #54B689;
+}
+
+.resume-section-heading::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 100%;
+    background: #54B689;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.resume-name {
+    font-size: 2.75rem;
+    font-weight: 900;
+    letter-spacing: 0.4rem;
+    color: #54B689;
+}
+
+.resume-tagline {
+    font-size: 1.25rem;
+    font-weight: 300;
+}
+
+.resume-contact {
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+    font-size: 0.75rem;
+}
+
+.resume-aside .item {
+    font-size: 0.875rem;
+}
+
+.resume-main .item-title {
+    font-size: 1rem;
+}
+
+.resume-main .item-meta {
+    font-size: 0.75rem;
+}
+
+.resume-main .item-content {
+    font-size: 0.875rem;
+}
+
+.resume-aside {
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.resume-aside .item-title {
+    font-size: 1rem;
+}
+
+.resume-lang-list,
+.resume-interests-list,
+.resume-education-list,
+.resume-awards-list {
+    font-size: 0.875rem;
+}
+
+.resume-social-list {
+    font-size: 0.75rem;
+}
+
+.fa-heart {
+    color: #fb866a;
+}
+
+/* Custom link styles */
+a.resume-link {
+    color: #4f4f4f;
+}
+
+a.resume-link:hover {
+    color: #54B689;
+}
+
+.resume-profile-image {
+    max-width: 120px;
+}
+
+.resume-intro {
+    font-size: 0.875rem;
+}
+
+@media (max-width: 991.98px) {
+    .resume-aside {
+        border-left: 0;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .resume-contact {
+        border-left: 0;
+    }
+}

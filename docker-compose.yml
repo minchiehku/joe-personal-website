@@ -7,7 +7,7 @@ services:
       MYSQL_USER: root
       MYSQL_PASSWORD: springboot
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql   # 添加此行以實現資料持久化
     networks:
