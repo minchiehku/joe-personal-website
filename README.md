@@ -137,7 +137,25 @@ Start the Application
     http://"public IPv4 address":8080
     ```
   
-## Website
+## Website Display
+
+### Index.html
+![web1](/web_pic/web1.png)
+
+![web2](/web_pic/web2.png)
+
+![web3](/web_pic/web3.png)
+
+### Comment and Management
+
+- Implemented a message board feature with full CRUD (Create, Read, Update, Delete) functionality, with message data stored in a MySQL database. Both the application and database are containerized and launched using Docker Compose.
+- Integrated account management and login verification using Spring Security, featuring authentication, authorization, and CSRF protection to enhance security.
+
+![comment](/web_pic/comment.png)
+
+![login](/web_pic/login.png)
+
+![edit](/web_pic/edit.png)
 
 ---
 
