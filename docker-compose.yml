@@ -1,28 +1,32 @@
+version: "3.8"
+
 services:
   db:
     image: mysql:8.0.22
+    container_name: joe-personal-website-db
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: springboot
       MYSQL_DATABASE: personal_website
       MYSQL_USER: root
       MYSQL_PASSWORD: springboot
     ports:
-      - "3307:3306"
+      - "3307:3306"  # 讓本機透過 localhost:3307 連接 MySQL
     volumes:
-      - mysql_data:/var/lib/mysql   # 添加此行以實現資料持久化
+      - mysql_data:/var/lib/mysql
     networks:
       - app-network
 
   app:
     build: .
-    ports:
-      - "8080:8080"
+    container_name: joe-personal-website-app
+    restart: always
     depends_on:
       - db
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/personal_website
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: springboot
+      SPRING_PROFILES_ACTIVE: docker  # 讓 Spring Boot 自動讀取 application-docker.properties
+    ports:
+      - "8080:8080"
     networks:
       - app-network
 
@@ -30,4 +34,4 @@ networks:
   app-network:
 
 volumes:
-  mysql_data:   # 定義一個命名卷 mysql_data
+  mysql_data:
