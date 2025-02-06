@@ -7,15 +7,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 @Configuration
 public class SecurityConfig {
@@ -26,12 +25,20 @@ public class SecurityConfig {
                 .authorizeHttpRequests((requests) -> requests
                         // 允許所有人訪問以下路徑
                         .requestMatchers("/", "/index.html", "/comments.html", "/assets/**", "/csrf").permitAll()
+                        // 放行 Swagger 相關路徑
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**"
+                        ).permitAll()
                         // 允許未經認證的用戶對 /api/comments 執行 GET 和 POST 請求
                         .requestMatchers(HttpMethod.GET, "/api/comments/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/comments/**").permitAll()
                         // 需要認證的請求
                         .requestMatchers("/admin/**", "/commentManagement.html").authenticated()
-                        .requestMatchers("/api/comments/**").authenticated() // 其他對 /api/comments/** 的請求需要認證（如 PUT、DELETE）
+                        // 其他對 /api/comments/** 的請求需要認證（如 PUT、DELETE）
+                        .requestMatchers("/api/comments/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
@@ -58,12 +65,11 @@ public class SecurityConfig {
     // 配置用戶詳細信息服務
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails user =
-                User.builder()
-                        .username("admin")
-                        .password(passwordEncoder().encode("password")) // 使用密碼編碼器進行編碼
-                        .roles("ADMIN")
-                        .build();
+        UserDetails user = User.builder()
+                .username("admin")
+                .password(passwordEncoder().encode("password")) // 使用密碼編碼器進行編碼
+                .roles("ADMIN")
+                .build();
 
         return new InMemoryUserDetailsManager(user);
     }

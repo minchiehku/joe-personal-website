@@ -17,7 +17,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
 
     /**
-     * 使用構造函數注入方式來注入 CommentRepository。
+     * 使用建構函數注入方式來注入 CommentRepository。
      * Spring Boot 會自動注入這個依賴，使得服務層能夠與資料庫進行互動。
      *
      * @param commentRepository 注入的 CommentRepository 物件，用來操作資料庫

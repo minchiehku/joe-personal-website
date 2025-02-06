@@ -36,3 +36,6 @@ build/
 ai/
 pic/
 
+.mvn/
+mvnw
+mvnw.cmd
