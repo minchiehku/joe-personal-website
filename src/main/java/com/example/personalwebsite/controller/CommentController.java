@@ -5,9 +5,11 @@ import com.example.personalwebsite.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.api.ErrorMessage;
 import org.springframework.web.bind.annotation.*;
@@ -43,11 +45,28 @@ public class CommentController {
      */
     @Operation(summary = "新增新留言", description = "接收前端傳入留言, 保存到DB")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "成功新增留言",
-                content = @Content(schema = @Schema(implementation = Comment.class))),
+            @ApiResponse(responseCode = "200", description = "成功儲存留言",
+                    content = @Content(schema = @Schema(implementation = Comment.class))),
+            @ApiResponse(responseCode = "400", description = "請求格式錯誤",
+                    content = @Content),
+            @ApiResponse(responseCode = "500", description = "伺服器錯誤",
+                    content = @Content)
     })
     @PostMapping
-    public Comment createComment(@RequestBody Comment comment) {
+    public Comment createComment(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "請求應包含 `name`、`email` 和 `comment`",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "新增留言範例",
+                                    value = "{ \"name\": \"Joe\", \"email\": \"joe@example.com\", \"comment\": \"這是一則留言\" }"
+                            )
+                    )
+            )
+            @RequestBody Comment comment) {
+        comment.setId(null);
         return commentService.saveComment(comment); // 調用服務層來保存新留言
     }
 
@@ -56,7 +75,6 @@ public class CommentController {
      *
      * @return 返回包含所有留言的列表，這些留言由 Comment 對象表示
      */
-
     @Operation(summary = "取得所有留言", description = "從DB中查詢所有留言")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "成功返回所有留言",
@@ -73,7 +91,6 @@ public class CommentController {
      * @param id 留言的唯一標識符
      * @return 返回該 ID 對應的 Comment 對象
      */
-
     @Operation(summary = "根據ID查詢留言", description = "根據留言的唯一識別ID查詢留言")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "成功回傳留言",
@@ -92,11 +109,10 @@ public class CommentController {
      * @param name 使用者名稱
      * @return 返回該名稱對應的留言列表
      */
-
     @Operation(summary = "根據name查詢留言", description = "根據name查詢留言並回傳對應的留言列表")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "成功回傳留言列表",
-                content = @Content(schema = @Schema(implementation = Comment.class)))
+                    content = @Content(schema = @Schema(implementation = Comment.class)))
     })
     @GetMapping("/search")
     public List<Comment> getCommentsByName(
@@ -112,14 +128,29 @@ public class CommentController {
      * @param updatedComment 包含更新後內容的 Comment 對象
      * @return 返回更新後的 Comment 對象
      */
-    @Operation(summary = "根據ID更新留言", description = "根據指定ID更新留言內容")
+    @Operation(summary = "根據ID更新留言",
+            description = "根據指定ID更新留言內容",
+            security = { @SecurityRequirement(name = "basicAuth") }  // 這個 API 需要登入)
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "成功更新留言",
                     content = @Content(schema = @Schema(implementation = Comment.class))),
     })
     @PutMapping("/{id}")
-    public Comment updateComment(@PathVariable Long id,
-                                 @RequestBody Comment updatedComment) {
+    public Comment updateComment(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "請求應包含 'comment'",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "更改留言範例",
+                                    value = "{ \"這是新的留言\" }"
+                            )
+                    )
+            )
+            @PathVariable Long id,
+            @RequestBody Comment updatedComment) {
         return commentService.updateComment(id, updatedComment);
     }
 

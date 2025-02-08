@@ -1,4 +1,5 @@
-DELETE FROM comment_board;
+TRUNCATE TABLE comment_board;
+
 INSERT INTO comment_board (name, email, comment, timestamp)
 VALUES
     ('Alice Johnson', 'alice@example.com', 'This is a great post!', '2024-01-15 10:23:45.000000'),

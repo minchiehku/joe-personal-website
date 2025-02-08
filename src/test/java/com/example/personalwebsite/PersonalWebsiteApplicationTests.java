@@ -10,6 +10,6 @@ class PersonalWebsiteApplicationTests {
 
     @Test
     void contextLoads() {
-        // 測試內容
+        System.out.println("Spring Boot 成功啟動！");
     }
 }

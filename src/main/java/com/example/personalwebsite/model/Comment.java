@@ -1,5 +1,6 @@
 package com.example.personalwebsite.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -30,7 +31,7 @@ public class Comment {
     // 訪客的留言內容
     private String comment;
 
-    @Schema(description = "留言時間", example = "2025-02-04T16:25:28.939")
+    @Schema(description = "留言時間, 自動產生", example = "2025-02-04T16:25:28.939")
     // 留言的時間戳，默認為當前時間
     private LocalDateTime timestamp;
 
@@ -39,6 +40,9 @@ public class Comment {
      */
     public Comment() {
         this.timestamp = LocalDateTime.now(); // 預設的時間戳為當前時間
+    }
+
+    public Comment(long l, String joe, String mail, String 這是一則留言) {
     }
 
     // Getter 和 Setter 方法，用於操作 Comment 的屬性

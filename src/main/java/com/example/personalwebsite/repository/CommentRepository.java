@@ -15,4 +15,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     // 根據名稱查詢留言
     List<Comment> findByName(String name);
+
+
+
 }
