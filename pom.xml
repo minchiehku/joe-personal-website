@@ -73,6 +73,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- 使用 Spring Security 測試 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
