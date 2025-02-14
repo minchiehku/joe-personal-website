@@ -14,6 +14,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -93,20 +95,21 @@ class CommentControllerTest {
     void testCreateComment() throws Exception {
         logger.info("開始測試 createComment()");
 
-        // 1. 準備請求資料（JSON 字串），這裡 JSON 字串中不需要包含 id (由 Controller 設定為 null)
+        // 1. Arrange(安排): 準備請求的留言資料（JSON 字串），這裡 JSON 字串中不需要包含 id (由 Controller 設定為 null)
         String newCommentJson = "{ \"name\": \"Joe\", \"email\": \"joe@example.com\", \"comment\": \"這是一則留言\" }";
 
-        // 2. 模擬 Service 層的行為, 當呼叫 commentService.saveComment(...) 時，返回一個模擬的 Comment 物件，
+        // 模擬 Service 層的行為, 當呼叫 commentService.saveComment(...) 時，返回一個模擬的 Comment 物件，
         // 在實際運行中，id 是設定由資料庫自動生成的，但在單元測試中，不會連接真實的資料庫，所以模擬 Service 返回的物件，並自行設定一個 id（例如 1L）。
         // timestamp 由 comment類 建構函數時自動產生
         Comment savedComment = new Comment(1L, "Joe", "joe@example.com", "這是一則留言");
         when(commentService.saveComment(any(Comment.class))).thenReturn(savedComment);
 
-        // 3. 使用 MockMvc 發送 POST 請求到 /api/comments
+        // 2. Act(執行): 使用 MockMvc 發送 POST 請求到 /api/comments
         mockMvc.perform(post("/api/comments")
                         .with(csrf())  //模擬帶有 CSRF Token 的請求
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(newCommentJson))
+                // 3. Assert(斷言)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Joe"))
@@ -116,7 +119,70 @@ class CommentControllerTest {
 
         logger.info("測試成功: createComment() 返回預期的結果");
 
-        // 4. 驗證 CommentService.saveComment() 方法是否被呼叫一次
+        // 驗證 CommentService.saveComment() 方法是否被呼叫一次
         verify(commentService, times(1)).saveComment(any(Comment.class));
     }
+
+    @Test
+    @WithMockUser(username = "testUser", roles = {"USER"})
+    void testCreateComment_MissingField() throws Exception {
+        logger.info("開始測試 createComment() 缺少欄位的情況");
+
+        // 準備 JSON 請求資料，但缺少 email 欄位
+        String invalidCommentJson = "{ \"name\": \"Joe\", \"comment\": \"這是一則留言\" }";
+
+        // 期望這個請求會返回 HTTP 400 (Bad Request)
+        mockMvc.perform(post("/api/comments")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidCommentJson))
+                .andExpect(status().isBadRequest());
+
+        logger.info("測試成功: 當請求缺少必要欄位時返回 Bad Request");
+    }
+
+    @Test
+    @WithMockUser(username = "testUser", roles = {"USER"})
+    void testCreateComment_EmptyContent() throws Exception {
+        logger.info("開始測試 createComment() 空內容的情況");
+
+        // 準備一個空的 JSON 字串
+        String emptyJson = "{}";
+
+        mockMvc.perform(post("/api/comments")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(emptyJson))
+                .andExpect(status().isBadRequest());
+
+        logger.info("測試成功: 空內容請求返回 Bad Request");
+    }
+
+    /**
+     * 測試 POST /api/comments API：當 Service 拋出異常時返回 500 Internal Server Error
+     */
+    @Test
+    @WithMockUser(username = "testUser", roles = {"USER"})
+    void testCreateComment_ServiceException() throws Exception {
+        logger.info("開始測試 createComment() 異常情況");
+
+        String newCommentJson = "{ \"name\": \"Joe\", \"email\": \"joe@example.com\", \"comment\": \"這是一則留言\" }";
+
+        // 模擬 Service 在 saveComment 時拋出 RuntimeException
+        when(commentService.saveComment(any(Comment.class)))
+                .thenThrow(new RuntimeException("資料庫錯誤"));
+
+        // 發送 POST 請求，預期返回 HTTP 500 與錯誤訊息 "資料庫錯誤"
+        mockMvc.perform(post("/api/comments")
+                        .with(csrf())  // 確保請求包含 CSRF Token
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(newCommentJson))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string("資料庫錯誤"));
+
+        logger.info("測試成功: 異常情況下返回 Internal Server Error 並顯示錯誤訊息");
+
+        verify(commentService, times(1)).saveComment(any(Comment.class));
+    }
+
 }

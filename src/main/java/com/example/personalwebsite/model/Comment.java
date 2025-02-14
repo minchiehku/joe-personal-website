@@ -2,6 +2,9 @@ package com.example.personalwebsite.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 import java.time.LocalDateTime;
 
 /**
@@ -17,12 +20,16 @@ public class Comment {
     @Schema(description = "主鍵 ID, 自動產生", example = "1")
     private Long id;
 
+    @NotBlank(message = "名字不可空白")
     @Schema(description = "訪客姓名", example = "Joe")
     private String name;
 
+    @NotBlank(message = "Email不可空白")
+    @Email(message = "Email格式錯誤")
     @Schema(description = "訪客電子郵件", example = "joe@example.com")
     private String email;
 
+    @NotBlank(message = "留言不可空白")
     @Schema(description = "留言內容", example = "這是一則留言")
     private String comment;
 

@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springdoc.api.ErrorMessage;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,8 +66,8 @@ public class CommentController {
                             )
                     )
             )
-            @RequestBody Comment comment) {
-        comment.setId(null);
+            @Valid @RequestBody Comment comment) {
+        comment.setId(null); //確保即使前端傳入了 id，也會被重置為 null（資料庫會自動生成 id）。
         return commentService.saveComment(comment); // 調用服務層來保存新留言
     }
 
